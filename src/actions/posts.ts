@@ -12,7 +12,6 @@ export async function createPostAction(_prev: FormState, formData: FormData): Pr
 
   const parsed = postInputSchema.safeParse({
     title: String(formData.get('title') ?? ''),
-    slug: String(formData.get('slug') ?? ''),
     tags: String(formData.get('tags') ?? ''),
     content: String(formData.get('content') ?? ''),
   })
@@ -25,7 +24,6 @@ export async function createPostAction(_prev: FormState, formData: FormData): Pr
   try {
     slug = await createPost({
       title: parsed.data.title,
-      slug: parsed.data.slug || undefined,
       tags: parseTags(parsed.data.tags),
       content: parsed.data.content,
       author: user,
@@ -44,7 +42,6 @@ export async function updatePostAction(_prev: FormState, formData: FormData): Pr
   const slug = String(formData.get('slug') ?? '')
   const parsed = postInputSchema.safeParse({
     title: String(formData.get('title') ?? ''),
-    slug: '',
     tags: String(formData.get('tags') ?? ''),
     content: String(formData.get('content') ?? ''),
   })

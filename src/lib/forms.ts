@@ -18,11 +18,6 @@ export const loginSchema = z.object({
 
 export const postInputSchema = z.object({
   title: z.string().trim().min(2, '标题至少 2 个字').max(120, '标题最多 120 字'),
-  slug: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .pipe(z.union([z.literal(''), z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/, '链接地址只能用小写字母、数字和连字符')])),
   tags: z.string().trim().max(200, '标签过长'),
   content: z.string().trim().min(1, '内容不能为空').max(50_000, '内容最多 5 万字'),
 })

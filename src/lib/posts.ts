@@ -131,15 +131,12 @@ async function uniqueSlug() {
 
 export async function createPost(input: {
   title: string
-  slug?: string
   tags: string[]
   content: string
   author: string
 }): Promise<string> {
   return withLock('posts', async () => {
-    if (input.slug && (await exists(postDir(input.slug)))) throw new Error('该链接已被占用，换一个吧')
-
-    const slug = input.slug || (await uniqueSlug())
+    const slug = await uniqueSlug()
     const front = frontmatterSchema.parse({
       title: input.title,
       author: input.author,

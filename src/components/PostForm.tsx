@@ -29,13 +29,6 @@ export function PostForm({ action, post }: Props) {
         <input name="title" defaultValue={post?.title} required maxLength={120} className="field" />
       </label>
 
-      {!post && (
-        <label className="block text-sm">
-          <span className="mb-1 block text-neutral-500">链接地址（可选）</span>
-          <input name="slug" placeholder="留空自动生成" className="field" />
-        </label>
-      )}
-
       <label className="block text-sm">
         <span className="mb-1 block text-neutral-500">标签（用逗号分隔，最多 8 个）</span>
         <input name="tags" defaultValue={post?.tags.join(', ')} className="field" />
