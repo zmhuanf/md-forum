@@ -26,6 +26,14 @@ export const replyInputSchema = z.object({
   content: z.string().trim().min(1, '回复不能为空').max(20_000, '回复最多 2 万字'),
 })
 
+export const passwordChangeSchema = z
+  .object({
+    current: z.string().min(1, '请输入当前密码').max(72, '密码最多 72 位'),
+    next: z.string().min(8, '新密码至少 8 位').max(72, '新密码最多 72 位'),
+    confirm: z.string().min(1, '请再次输入新密码'),
+  })
+  .refine((data) => data.next === data.confirm, { message: '两次输入的新密码不一致', path: ['confirm'] })
+
 // 逗号或空白分隔的标签串转去重数组
 export const parseTags = (raw: string): string[] =>
   [...new Set(raw.split(/[,，\s]+/).map((tag) => tag.trim()).filter(Boolean))].slice(0, 8)
@@ -34,4 +42,4 @@ export const parseTags = (raw: string): string[] =>
 export const safeNext = (value: unknown) =>
   typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/'
 
-export type FormState = { error: string } | null
+export type FormState = { error?: string; message?: string } | null

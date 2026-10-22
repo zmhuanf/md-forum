@@ -17,7 +17,7 @@ export async function createPostAction(_prev: FormState, formData: FormData): Pr
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '内容不合法' }
 
-  const wait = await cooldown(`post:${user}`, 30)
+  const wait = await cooldown(`post:${user.id}`, 30)
   if (wait) return { error: wait }
 
   let slug: string
@@ -26,7 +26,8 @@ export async function createPostAction(_prev: FormState, formData: FormData): Pr
       title: parsed.data.title,
       tags: parseTags(parsed.data.tags),
       content: parsed.data.content,
-      author: user,
+      author: user.username,
+      authorId: user.id,
     })
   } catch (error) {
     return { error: error instanceof Error ? error.message : '发表失败，请重试' }
@@ -56,7 +57,7 @@ export async function updatePostAction(_prev: FormState, formData: FormData): Pr
         content: parsed.data.content,
         closed: formData.get('closed') === 'on',
       },
-      user,
+      user.id,
     )
   } catch (error) {
     return { error: error instanceof Error ? error.message : '保存失败，请重试' }
@@ -73,11 +74,11 @@ export async function replyAction(_prev: FormState, formData: FormData): Promise
   const parsed = replyInputSchema.safeParse({ content: String(formData.get('content') ?? '') })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '回复不合法' }
 
-  const wait = await cooldown(`reply:${user}`, 10)
+  const wait = await cooldown(`reply:${user.id}`, 10)
   if (wait) return { error: wait }
 
   try {
-    await createReply(slug, parsed.data.content, user)
+    await createReply(slug, parsed.data.content, { id: user.id, username: user.username })
   } catch (error) {
     return { error: error instanceof Error ? error.message : '回复失败，请重试' }
   }
@@ -90,7 +91,7 @@ export async function deletePostAction(_prev: FormState, formData: FormData): Pr
   if (!user) return { error: '请先登录' }
 
   try {
-    await deletePost(String(formData.get('slug') ?? ''), user)
+    await deletePost(String(formData.get('slug') ?? ''), user.id)
   } catch (error) {
     return { error: error instanceof Error ? error.message : '删除失败，请重试' }
   }

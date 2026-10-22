@@ -1,6 +1,6 @@
 import { jwtVerify, SignJWT } from 'jose'
 import { cookies } from 'next/headers'
-import { userExists } from './users'
+import { getUserById, type User } from './users'
 
 const COOKIE_NAME = 'sid'
 const MAX_AGE = 60 * 60 * 24 * 7
@@ -12,8 +12,8 @@ const getKey = () => {
   return new TextEncoder().encode(secret)
 }
 
-const encode = (username: string) =>
-  new SignJWT({ username })
+const encode = (user: User) =>
+  new SignJWT({ id: user.id, v: user.sessionVersion })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${MAX_AGE}s`)
@@ -22,21 +22,24 @@ const encode = (username: string) =>
 const decode = async (token: string) => {
   try {
     const { payload } = await jwtVerify(token, getKey(), { algorithms: ['HS256'] })
-    return typeof payload.username === 'string' ? payload.username : null
+    return typeof payload.id === 'string' && typeof payload.v === 'number' ? { id: payload.id, version: payload.v } : null
   } catch {
     return null
   }
 }
 
-// 取当前登录用户名，令牌无效或用户已删除均视为未登录
-export async function getCurrentUser(): Promise<string | null> {
+// 取当前登录用户，令牌无效、用户已删除或会话版本过期均视为未登录
+export async function getCurrentUser(): Promise<User | null> {
   const token = (await cookies()).get(COOKIE_NAME)?.value
-  const username = token ? await decode(token) : null
-  return username && (await userExists(username)) ? username : null
+  const claim = token ? await decode(token) : null
+  if (!claim) return null
+
+  const user = await getUserById(claim.id)
+  return user && user.sessionVersion === claim.version ? user : null
 }
 
-export async function startSession(username: string) {
-  ;(await cookies()).set(COOKIE_NAME, await encode(username), {
+export async function startSession(user: User) {
+  ;(await cookies()).set(COOKIE_NAME, await encode(user), {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',

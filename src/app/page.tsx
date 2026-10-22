@@ -100,7 +100,9 @@ export default async function HomePage({ searchParams }: Props) {
                   </Link>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                  <span>{meta.author}</span>
+                  <Link href={`/u/${meta.authorId}`} className="hover:underline">
+                    {meta.author}
+                  </Link>
                   <span>·</span>
                   <time dateTime={meta.createdAt}>{formatDate(meta.createdAt)}</time>
                   {meta.tags.map((item) => (

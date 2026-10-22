@@ -26,7 +26,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/new" className="hover:underline">
                     发帖
                   </Link>
-                  <span className="text-neutral-500">{user}</span>
+                  <Link href={`/u/${user.id}`} className="text-neutral-500 hover:underline">
+                    {user.username}
+                  </Link>
                   <form action={logoutAction}>
                     <button type="submit" className="text-neutral-500 hover:underline">
                       退出

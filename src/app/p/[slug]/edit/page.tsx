@@ -18,7 +18,7 @@ export default async function EditPostPage({ params }: Props) {
 
   const post = await readPost(slug)
   if (!post) notFound()
-  if (post.meta.author !== user) notFound()
+  if (post.meta.authorId !== user.id) notFound()
 
   return (
     <div>

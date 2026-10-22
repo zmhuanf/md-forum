@@ -30,7 +30,7 @@ export default async function PostPage({ params }: Props) {
 
   const [html, replyHtml] = await Promise.all([renderMarkdown(post.content), Promise.all(replies.map((reply) => renderMarkdown(reply.content)))])
   const { meta } = post
-  const isAuthor = user === meta.author
+  const isAuthor = user?.id === meta.authorId
 
   return (
     <div>
@@ -48,7 +48,9 @@ export default async function PostPage({ params }: Props) {
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-          <span>{meta.author}</span>
+          <Link href={`/u/${meta.authorId}`} className="hover:underline">
+            {meta.author}
+          </Link>
           <span>·</span>
           <time dateTime={meta.createdAt}>{formatDate(meta.createdAt)}</time>
           {meta.updatedAt && <span>（编辑于 {formatDate(meta.updatedAt)}）</span>}
@@ -79,7 +81,9 @@ export default async function PostPage({ params }: Props) {
           {replies.map((reply, index) => (
             <li key={reply.id} className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
               <div className="flex items-center gap-2 text-xs text-neutral-500">
-                <span className="font-medium text-neutral-900 dark:text-neutral-100">{reply.author}</span>
+                <Link href={`/u/${reply.authorId}`} className="font-medium text-neutral-900 hover:underline dark:text-neutral-100">
+                  {reply.author}
+                </Link>
                 <time dateTime={reply.createdAt}>{formatDate(reply.createdAt)}</time>
                 <span>#{index + 1}</span>
               </div>
