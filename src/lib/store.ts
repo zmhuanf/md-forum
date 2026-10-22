@@ -2,8 +2,9 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import lockfile from 'proper-lockfile'
 import atomicWrite from 'write-file-atomic'
+import { DATA_DIR } from './paths'
 
-const LOCK_DIR = path.join(process.cwd(), '.locks')
+const LOCK_DIR = path.join(DATA_DIR, 'locks')
 const chains = new Map<string, Promise<unknown>>()
 
 // 先按 key 在进程内排队，再用文件锁保证跨进程互斥

@@ -1,9 +1,7 @@
 node_modules
 .next
 out
-posts
-users.json
-.locks
+.data
 .env
 .env.local
 .env.*.local
