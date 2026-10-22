@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { startTransition, useActionState } from 'react'
 import type { FormState } from '@/lib/forms'
 import { MarkdownEditor } from './MarkdownEditor'
 
@@ -17,7 +17,8 @@ export function ReplyForm({ action, slug }: Props) {
       // 手动提交，避免 action 完成后 React 重置表单清空已输入内容
       onSubmit={(event) => {
         event.preventDefault()
-        formAction(new FormData(event.currentTarget))
+        const formData = new FormData(event.currentTarget)
+        startTransition(() => formAction(formData))
       }}
       className="space-y-3"
     >
