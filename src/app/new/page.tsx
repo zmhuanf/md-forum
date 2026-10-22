@@ -10,9 +10,9 @@ export default async function NewPostPage() {
   if (!user) redirect('/login?next=/new')
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold">发帖</h1>
-      <div className="mt-6">
+    <div className="mx-auto max-w-3xl">
+      <h1 className="text-xl font-semibold tracking-tight">发帖</h1>
+      <div className="card mt-6 p-4 sm:p-6">
         <PostForm action={createPostAction} />
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { startTransition, useActionState } from 'react'
 import type { FormState } from '@/lib/forms'
 import { MarkdownEditor } from './MarkdownEditor'
+import { SubmitButton } from './SubmitButton'
 
 type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>
@@ -20,34 +21,41 @@ export function PostForm({ action, post }: Props) {
         const formData = new FormData(event.currentTarget)
         startTransition(() => formAction(formData))
       }}
-      className="space-y-4"
+      className="space-y-5"
     >
       {post && <input type="hidden" name="slug" value={post.slug} />}
 
-      <label className="block text-sm">
-        <span className="mb-1 block text-neutral-500">标题</span>
-        <input name="title" defaultValue={post?.title} required maxLength={120} className="field" />
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-medium text-muted">标题</span>
+        <input
+          name="title"
+          defaultValue={post?.title}
+          required
+          maxLength={120}
+          placeholder="一句话说清楚要讨论什么"
+          className="field"
+        />
       </label>
 
-      <label className="block text-sm">
-        <span className="mb-1 block text-neutral-500">标签（用逗号分隔，最多 8 个）</span>
-        <input name="tags" defaultValue={post?.tags.join(', ')} className="field" />
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-medium text-muted">标签（用逗号分隔，最多 8 个）</span>
+        <input name="tags" defaultValue={post?.tags.join(', ')} placeholder="前端, 随想" className="field" />
       </label>
 
       {post && (
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="closed" defaultChecked={post.closed} />
+          <input type="checkbox" name="closed" defaultChecked={post.closed} className="accent-brand-600" />
           关闭回复
         </label>
       )}
 
       <MarkdownEditor name="content" defaultValue={post?.content} placeholder="写点什么…" />
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p className="rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">{state.error}</p>
+      )}
 
-      <button type="submit" disabled={pending} className="button button-primary">
-        {pending ? '提交中…' : post ? '保存修改' : '发表'}
-      </button>
+      <SubmitButton pending={pending}>{post ? '保存修改' : '发表'}</SubmitButton>
     </form>
   )
 }

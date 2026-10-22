@@ -1,130 +1,447 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-:root {
-  --line: color-mix(in oklab, currentColor 14%, transparent);
+/* 主题由 next-themes 在 html 上切换 .dark，取代 Tailwind 默认的媒体查询 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-canvas: #faf9f7;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f3f1ec;
+  --color-ink: #191713;
+  --color-muted: #6d685f;
+  --color-line: rgb(25 23 19 / 0.12);
+  --color-danger: #b91c1c;
+  --color-accent: #82500c;
+
+  --color-brand-50: #fdf8ed;
+  --color-brand-100: #f8ecd0;
+  --color-brand-200: #f0d79f;
+  --color-brand-300: #e5bb68;
+  --color-brand-400: #d9a13c;
+  --color-brand-500: #b8801c;
+  --color-brand-600: #a16207;
+  --color-brand-700: #82500c;
+  --color-brand-800: #6b4211;
+  --color-brand-900: #583714;
+
+  --shadow-card: 0 1px 2px rgb(25 23 19 / 0.04), 0 12px 32px -24px rgb(25 23 19 / 0.25);
+  --shadow-lift: 0 1px 2px rgb(25 23 19 / 0.04), 0 18px 40px -30px rgb(25 23 19 / 0.35);
+
+  --animate-rise: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade: fade 0.35s ease both;
 }
 
-body {
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* macOS 风格的输入框焦点环 */
-.field {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.5rem 0.7rem;
-  background: transparent;
-  outline: none;
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.field:focus {
-  border-color: #737373;
+/* 语义色在深色下整体覆盖，工具类因此不需要逐个写 dark: */
+.dark {
+  --color-canvas: #0c0b0a;
+  --color-surface: #14120f;
+  --color-surface-soft: #1d1a16;
+  --color-ink: #f3f0ea;
+  --color-muted: #a49d92;
+  --color-line: rgb(255 248 235 / 0.12);
+  --color-danger: #f87171;
+  --color-accent: #e5bb68;
+  color-scheme: dark;
 }
 
-.button {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
-  cursor: pointer;
+@layer base {
+  html {
+    scroll-padding-top: 5.5rem;
+    color-scheme: light;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 20%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @supports (scrollbar-width: thin) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-line) transparent;
+    }
+  }
+
+  /* 尊重系统的减少动效设置 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+@layer components {
+  /* 卡片：描边 + 柔和投影，hover 版本轻微抬升 */
+  .card {
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-hover {
+    transition: border-color 0.18s ease;
+  }
+
+  .card-hover:hover {
+    border-color: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background-color: var(--color-surface);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .field::placeholder {
+    color: color-mix(in oklab, var(--color-muted) 80%, transparent);
+  }
+
+  .field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 15%, transparent);
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.65rem;
+    background-color: var(--color-surface);
+    padding: 0.45rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.1s ease;
+  }
+
+  .button:hover {
+    background-color: var(--color-surface-soft);
+  }
+
+  .button:active {
+    transform: translateY(1px);
+  }
+
+  .button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .button-primary {
+    border-color: transparent;
+    background-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  .button-primary:hover {
+    background-color: color-mix(in oklab, var(--color-ink) 86%, var(--color-canvas));
+  }
+
+  /* 标签胶囊：默认描边，选中态用品牌渐变 */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .chip:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 45%, var(--color-line));
+    background-color: color-mix(in oklab, var(--color-accent) 8%, transparent);
+    color: var(--color-accent);
+  }
+
+  .chip-active {
+    border-color: transparent;
+    background-color: var(--color-brand-600);
+    color: #fff;
+  }
+
+  .chip-active:hover {
+    border-color: transparent;
+    background-color: var(--color-brand-700);
+    color: #fff;
+  }
+
+  /* 首屏背景网格，仅用于 Hero 的装饰层 */
+  .grid-glow {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(62% 72% at 50% 0%, #000, transparent 74%);
+    mask-image: radial-gradient(62% 72% at 50% 0%, #000, transparent 74%);
+  }
 }
 
-.button-primary {
-  background: #171717;
-  border-color: #171717;
-  color: #fff;
+/*
+ * 以下规则不写进 @layer：未分层声明优先于分层样式，才能盖住 typography 插件与 MDXEditor 自带的样式；
+ * body 前缀是额外的特异性保险；不设字号，页面仍可用工具类调正文大小。
+ */
+
+/* 正文排版：覆盖 typography 的默认配色与元素外观 */
+body .prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-line);
+  --tw-prose-hr: var(--color-line);
+  --tw-prose-quotes: var(--color-ink);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-captions: var(--color-muted);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-pre-code: var(--color-ink);
+  --tw-prose-th-borders: var(--color-line);
+  --tw-prose-td-borders: var(--color-line);
+  line-height: 1.85;
 }
 
-/* Typography 之外的少量定制：任务列表勾选框与代码块横向滚动 */
-.prose li > input[type='checkbox'] {
+/* 回复等内容较短的地方用稍小一号的正文 */
+body .prose-compact {
+  font-size: 0.95rem;
+}
+
+body .prose :where(h1, h2, h3, h4) {
+  letter-spacing: -0.015em;
+}
+
+body .prose :where(h2) {
+  margin-top: 2.1em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--color-line);
+}
+
+body .prose :where(h3) {
+  margin-top: 1.7em;
+}
+
+body .prose :where(a) {
+  font-weight: 500;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+body .prose :where(a:hover) {
+  color: var(--color-accent);
+}
+
+body .prose :where(blockquote) {
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0 0.75rem 0.75rem 0;
+  background-color: color-mix(in oklab, var(--color-accent) 8%, transparent);
+  padding: 0.9rem 1.1rem;
+  font-style: normal;
+  quotes: none;
+}
+
+body .prose :where(blockquote p:first-of-type)::before,
+body .prose :where(blockquote p:last-of-type)::after {
+  content: none;
+}
+
+body .prose :where(pre) {
+  border: 1px solid var(--color-line);
+  border-radius: 0.9rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+body .prose :where(pre code) {
+  border: none;
+  background: none;
+  padding: 0;
+  font-weight: 400;
+}
+
+body .prose :where(:not(pre) > code) {
+  border: 1px solid var(--color-line);
+  border-radius: 0.4rem;
+  background-color: var(--color-surface-soft);
+  padding: 0.1em 0.4em;
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+body .prose :where(:not(pre) > code)::before,
+body .prose :where(:not(pre) > code)::after {
+  content: none;
+}
+
+body .prose :where(img) {
+  border: 1px solid var(--color-line);
+  border-radius: 0.9rem;
+}
+
+body .prose :where(thead th) {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-muted);
+}
+
+body .prose :where(td, th) {
+  padding: 0.5em 0.8em;
+}
+
+body .prose :where(tbody tr) {
+  transition: background-color 0.15s ease;
+}
+
+body .prose :where(tbody tr:hover) {
+  background-color: var(--color-surface-soft);
+}
+
+body .prose :where(hr) {
+  border-color: var(--color-line);
+}
+
+/* 任务列表勾选框跟品牌色走 */
+body .prose :where(li > input[type='checkbox']) {
   margin-right: 0.4em;
+  accent-color: var(--color-brand-600);
 }
 
-.prose pre {
-  overflow-x: auto;
+/* 代码高亮跟随主题切换 shiki 双主题变量 */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
 }
 
-/* 代码高亮按系统主题切换 shiki 双主题变量 */
-@media (prefers-color-scheme: dark) {
-  .shiki,
-  .shiki span {
-    color: var(--shiki-dark) !important;
-  }
-
-  .shiki {
-    background-color: var(--shiki-dark-bg) !important;
-  }
+.dark .shiki {
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 /* MDXEditor 自带的调色变量是固定浅色，这里换成站点配色，特异性盖过它的 :root */
 div.editor-shell {
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--color-line);
+  border-radius: 0.9rem;
   overflow: hidden;
-  --basePageBg: #fff;
-  --baseBase: #fff;
-  --baseBg: #fff;
-  --baseBgSubtle: #fafafa;
-  --baseBgHover: #f5f5f5;
-  --baseBgActive: #e5e5e5;
-  --baseBorder: #e5e5e5;
-  --baseBorderHover: #d4d4d4;
-  --baseLine: #e5e5e5;
-  --baseText: #525252;
-  --baseTextContrast: #171717;
-  --baseSolid: #a3a3a3;
-  --baseSolidHover: #737373;
-  --accentBg: #f5f5f5;
-  --accentBgActive: #e5e5e5;
-  --accentBorder: #e5e5e5;
-  --accentBorderHover: #d4d4d4;
-  --accentLine: #e5e5e5;
-  --accentSolid: #737373;
-  --accentSolidHover: #525252;
-  --accentText: #404040;
-  --admonitionBg: #fafafa;
+  --basePageBg: #ffffff;
+  --baseBase: #ffffff;
+  --baseBg: #ffffff;
+  --baseBgSubtle: #f6f4ef;
+  --baseBgHover: #f0ede6;
+  --baseBgActive: #e7e2d8;
+  --baseBorder: #e6e1d6;
+  --baseBorderHover: #d5cec0;
+  --baseLine: #e6e1d6;
+  --baseText: #5c574d;
+  --baseTextContrast: #191713;
+  --baseSolid: #a8a196;
+  --baseSolidHover: #7d7669;
+  --accentBg: #f8ecd0;
+  --accentBgActive: #f0d79f;
+  --accentBorder: #f0d79f;
+  --accentBorderHover: #e5bb68;
+  --accentLine: #f0d79f;
+  --accentSolid: #a16207;
+  --accentSolidHover: #82500c;
+  --accentText: #6b4211;
+  --admonitionBg: #f6f4ef;
 }
 
-@media (prefers-color-scheme: dark) {
-  div.editor-shell {
-    --basePageBg: #0a0a0a;
-    --baseBase: #0a0a0a;
-    --baseBg: #0a0a0a;
-    --baseBgSubtle: #171717;
-    --baseBgHover: #262626;
-    --baseBgActive: #404040;
-    --baseBorder: #404040;
-    --baseBorderHover: #525252;
-    --baseLine: #262626;
-    --baseText: #a3a3a3;
-    --baseTextContrast: #f5f5f5;
-    --baseSolid: #525252;
-    --baseSolidHover: #737373;
-    --accentBg: #262626;
-    --accentBgActive: #404040;
-    --accentBorder: #404040;
-    --accentBorderHover: #525252;
-    --accentLine: #404040;
-    --accentSolid: #737373;
-    --accentSolidHover: #a3a3a3;
-    --accentText: #d4d4d4;
-    --admonitionBg: #171717;
-  }
+.dark div.editor-shell {
+  --basePageBg: #14120f;
+  --baseBase: #14120f;
+  --baseBg: #14120f;
+  --baseBgSubtle: #1d1a16;
+  --baseBgHover: #26221c;
+  --baseBgActive: #332d25;
+  --baseBorder: #332d25;
+  --baseBorderHover: #453c30;
+  --baseLine: #2b2620;
+  --baseText: #a49d92;
+  --baseTextContrast: #f3f0ea;
+  --baseSolid: #4d4539;
+  --baseSolidHover: #6b6152;
+  --accentBg: #2a2114;
+  --accentBgActive: #3a2d1a;
+  --accentBorder: #3a2d1a;
+  --accentBorderHover: #4d3b22;
+  --accentLine: #3a2d1a;
+  --accentSolid: #e5bb68;
+  --accentSolidHover: #f0d79f;
+  --accentText: #f0d79f;
+  --admonitionBg: #1d1a16;
 }
 
 /* 内容区高度跟随表单传入的行数 */
 div.editor-shell .editor-content {
   min-height: var(--editor-height, 14rem);
-  padding: 0.75rem 0.9rem;
+  padding: 0.85rem 1rem;
   font-family: inherit;
   font-size: 0.9rem;
+  line-height: 1.8;
 }
 
 /* 工具栏内边距与分隔线跟随站点样式，并禁止横向滚动 */
@@ -134,12 +451,13 @@ div.editor-shell .mdxeditor-toolbar {
   overflow-x: visible;
   gap: 0.1rem;
   border-radius: 0;
-  padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid var(--color-line);
 }
 
 /* 按钮背景一律跟站点走，避免深色下出现白块 */
 div.editor-shell .mdxeditor-toolbar button {
+  border-radius: 0.45rem;
   background-color: transparent;
   color: inherit;
 }

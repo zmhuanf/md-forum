@@ -2,6 +2,7 @@
 
 import { startTransition, useActionState } from 'react'
 import type { FormState } from '@/lib/forms'
+import { SubmitButton } from './SubmitButton'
 
 type Props = {
   action: (state: FormState, formData: FormData) => Promise<FormState>
@@ -24,27 +25,32 @@ export function CredentialsForm({ action, mode, next }: Props) {
     >
       <input type="hidden" name="next" value={next} />
 
-      <label className="block text-sm">
-        <span className="mb-1 block text-neutral-500">用户名</span>
-        <input name="username" required autoComplete="username" className="field" />
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-medium text-muted">用户名</span>
+        <input name="username" required autoComplete="username" placeholder="yourname" className="field" />
       </label>
 
-      <label className="block text-sm">
-        <span className="mb-1 block text-neutral-500">密码{mode === 'register' && '（至少 8 位）'}</span>
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-medium text-muted">
+          密码{mode === 'register' && '（至少 8 位）'}
+        </span>
         <input
           name="password"
           type="password"
           required
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          placeholder="••••••••"
           className="field"
         />
       </label>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p className="rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">{state.error}</p>
+      )}
 
-      <button type="submit" disabled={pending} className="button button-primary">
-        {pending ? '提交中…' : mode === 'login' ? '登录' : '注册并登录'}
-      </button>
+      <SubmitButton pending={pending} className="w-full">
+        {mode === 'login' ? '登录' : '注册并登录'}
+      </SubmitButton>
     </form>
   )
 }

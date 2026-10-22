@@ -1,61 +1,33 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { logoutAction } from '@/actions/auth'
+import { GeistMono } from 'geist/font/mono'
+import { GeistSans } from 'geist/font/sans'
+import { SiteFooter } from '@/components/SiteFooter'
+import { SiteHeader } from '@/components/SiteHeader'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import { getCurrentUser } from '@/lib/session'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: { default: 'md forum', template: '%s · md forum' },
-  description: '一个简洁的讨论社区',
+  title: { default: '重峰论坛', template: '%s · 重峰论坛' },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
 
   return (
-    <html lang="zh-CN">
-      <body className="min-h-screen bg-white text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
-        <header className="border-b border-neutral-200 dark:border-neutral-800">
-          <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4">
-            <Link href="/" className="font-semibold tracking-tight">
-              md forum
-            </Link>
-            <nav className="flex items-center gap-4 text-sm">
-              {user ? (
-                <>
-                  <Link href="/new" className="hover:underline">
-                    发帖
-                  </Link>
-                  <Link href={`/u/${user.id}`} className="text-neutral-500 hover:underline">
-                    {user.username}
-                  </Link>
-                  <form action={logoutAction}>
-                    <button type="submit" className="text-neutral-500 hover:underline">
-                      退出
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="hover:underline">
-                    登录
-                  </Link>
-                  <Link href="/register" className="hover:underline">
-                    注册
-                  </Link>
-                </>
-              )}
-            </nav>
+    <html
+      lang="zh-CN"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+    >
+      <body className="min-h-screen bg-canvas text-ink antialiased">
+        <ThemeProvider>
+          <div className="flex min-h-screen flex-col">
+            <SiteHeader user={user && { id: user.id, username: user.username }} />
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+            <SiteFooter />
           </div>
-        </header>
-
-        <main className="mx-auto w-full max-w-3xl px-4 py-8">{children}</main>
-
-        <footer className="mx-auto flex w-full max-w-3xl justify-end px-4 pb-8 text-xs text-neutral-500">
-          <a href="/rss.xml" className="hover:underline">
-            RSS
-          </a>
-        </footer>
+        </ThemeProvider>
       </body>
     </html>
   )

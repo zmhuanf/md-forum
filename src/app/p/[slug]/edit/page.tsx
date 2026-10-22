@@ -21,9 +21,10 @@ export default async function EditPostPage({ params }: Props) {
   if (post.meta.authorId !== user.id) notFound()
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold">编辑帖子</h1>
-      <div className="mt-6">
+    <div className="mx-auto max-w-3xl">
+      <h1 className="text-xl font-semibold tracking-tight">编辑帖子</h1>
+      <p className="mt-1 text-xs text-muted">保存后读者会看到最新的正文与标签</p>
+      <div className="card mt-6 p-4 sm:p-6">
         <PostForm
           action={updatePostAction}
           post={{ slug, title: post.meta.title, tags: post.meta.tags, content: post.content, closed: post.meta.closed }}

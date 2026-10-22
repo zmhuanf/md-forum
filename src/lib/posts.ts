@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, rm, stat } from 'node:fs/promises'
 import path from 'node:path'
 import matter from 'gray-matter'
 import { z } from 'zod'
+import { excerpt } from './format'
 import { POSTS_DIR, postDir } from './paths'
 import { withLock, writeFileAtomic } from './store'
 
@@ -33,6 +34,7 @@ export type PostMeta = z.infer<typeof frontmatterSchema> & {
 }
 
 export type Post = { meta: PostMeta; content: string }
+export type PostSummary = PostMeta & { excerpt: string }
 export type Reply = { id: string; author: string; authorId: string; createdAt: string; content: string }
 export type ListOptions = {
   q?: string
@@ -85,6 +87,9 @@ async function loadPost(slug: string): Promise<Post | null> {
   return post
 }
 
+// 切片后带上正文摘要，只解析当前页的帖子
+const summarize = (post: Post): PostSummary => ({ ...post.meta, excerpt: excerpt(post.content, 110) })
+
 // 列出帖子，支持关键词、标签、排序与分页
 export async function listPosts({ q = '', tag = '', sort = 'active', page = 1, pageSize = 20 }: ListOptions = {}) {
   const entries = await readdir(POSTS_DIR, { withFileTypes: true }).catch(() => [])
@@ -109,23 +114,23 @@ export async function listPosts({ q = '', tag = '', sort = 'active', page = 1, p
 
   const pages = Math.max(1, Math.ceil(matched.length / pageSize))
   const current = Math.min(Math.max(1, Math.trunc(page) || 1), pages)
-  const items = matched.slice((current - 1) * pageSize, current * pageSize).map((post) => post.meta)
-  return { items, total: matched.length, page: current, pages }
+  const items = matched.slice((current - 1) * pageSize, current * pageSize).map(summarize)
+  const replyTotal = matched.reduce((sum, post) => sum + post.meta.replyCount, 0)
+  return { items, total: matched.length, replyTotal, page: current, pages }
 }
 
 // 列出某作者的帖子，按发布时间倒序，供用户主页使用
 export async function listPostsByAuthor(authorId: string, { page = 1, pageSize = 20 } = {}) {
   const entries = await readdir(POSTS_DIR, { withFileTypes: true }).catch(() => [])
   const loaded = await Promise.all(entries.filter((entry) => entry.isDirectory()).map((entry) => loadPost(entry.name)))
-  const metas = loaded
+  const posts = loaded
     .filter((post): post is Post => post?.meta.authorId === authorId)
-    .map((post) => post.meta)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .sort((a, b) => b.meta.createdAt.localeCompare(a.meta.createdAt))
 
-  const pages = Math.max(1, Math.ceil(metas.length / pageSize))
+  const pages = Math.max(1, Math.ceil(posts.length / pageSize))
   const current = Math.min(Math.max(1, Math.trunc(page) || 1), pages)
-  const items = metas.slice((current - 1) * pageSize, current * pageSize)
-  return { items, total: metas.length, page: current, pages }
+  const items = posts.slice((current - 1) * pageSize, current * pageSize).map(summarize)
+  return { items, total: posts.length, page: current, pages }
 }
 
 // 统计某作者发出的全部回复，供用户主页展示
@@ -143,8 +148,9 @@ export async function countRepliesByAuthor(authorId: string) {
 }
 
 export async function listTags() {
-  const { items } = await listPosts({ pageSize: Number.MAX_SAFE_INTEGER })
-  return [...new Set(items.flatMap((meta) => meta.tags))].sort()
+  const entries = await readdir(POSTS_DIR, { withFileTypes: true }).catch(() => [])
+  const loaded = await Promise.all(entries.filter((entry) => entry.isDirectory()).map((entry) => loadPost(entry.name)))
+  return [...new Set(loaded.flatMap((post) => post?.meta.tags ?? []))].sort()
 }
 
 export async function readPost(slug: string) {

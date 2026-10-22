@@ -1,5 +1,6 @@
 'use client'
 
+import { LoaderCircle, Trash2 } from 'lucide-react'
 import { useActionState } from 'react'
 import type { FormState } from '@/lib/forms'
 
@@ -20,10 +21,15 @@ export function DeletePostForm({ action, slug }: Props) {
       className="flex items-center gap-2"
     >
       <input type="hidden" name="slug" value={slug} />
-      <button type="submit" disabled={pending} className="button text-red-600">
+      <button
+        type="submit"
+        disabled={pending}
+        className="button h-8 px-2.5 text-xs text-danger hover:border-danger/30 hover:bg-danger/10"
+      >
+        {pending ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
         {pending ? '删除中…' : '删除'}
       </button>
-      {state?.error && <span className="text-xs text-red-600">{state.error}</span>}
+      {state?.error && <span className="text-xs text-danger">{state.error}</span>}
     </form>
   )
 }

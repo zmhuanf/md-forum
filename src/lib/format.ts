@@ -23,3 +23,23 @@ export const formatDate = (iso: string) => {
   const date = new Date(iso)
   return Number.isNaN(date.getTime()) ? '未知时间' : formatter.format(date)
 }
+
+const relative = new Intl.RelativeTimeFormat('zh-CN', { numeric: 'auto' })
+
+const MINUTE = 60_000
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
+
+// 列表里用相对时间，超过一周的旧帖退回具体日期
+// 页面是服务端渲染，取服务器当前时间即可，不参与客户端水合
+export const formatRelative = (iso: string) => {
+  const time = Date.parse(iso)
+  if (Number.isNaN(time)) return '未知时间'
+
+  const diff = time - Date.now()
+  if (Math.abs(diff) < MINUTE) return '刚刚'
+  if (Math.abs(diff) < HOUR) return relative.format(Math.round(diff / MINUTE), 'minute')
+  if (Math.abs(diff) < DAY) return relative.format(Math.round(diff / HOUR), 'hour')
+  if (Math.abs(diff) < 7 * DAY) return relative.format(Math.round(diff / DAY), 'day')
+  return formatDate(iso)
+}

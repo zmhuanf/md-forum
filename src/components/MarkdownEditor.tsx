@@ -5,7 +5,7 @@ import { useState, type CSSProperties } from 'react'
 
 const Content = dynamic(() => import('./MarkdownEditorContent'), {
   ssr: false,
-  loading: () => <div className="field min-h-40 text-sm text-neutral-500">编辑器加载中…</div>,
+  loading: () => <div className="field min-h-40 animate-pulse text-sm text-muted">编辑器加载中…</div>,
 })
 
 type Props = {

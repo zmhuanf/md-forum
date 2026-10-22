@@ -1,5 +1,7 @@
+import clsx from 'clsx'
 import Link from 'next/link'
-import { formatDate } from '@/lib/format'
+import { ChevronLeft, ChevronRight, FileSearch, Layers, Search } from 'lucide-react'
+import { PostCard } from '@/components/PostCard'
 import { listPosts, listTags } from '@/lib/posts'
 
 export const dynamic = 'force-dynamic'
@@ -34,111 +36,125 @@ export default async function HomePage({ searchParams }: Props) {
     return `/?${search.toString()}`
   }
 
+  const filtering = Boolean(q || tag)
+
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">
-          全部帖子 <span className="text-sm font-normal text-neutral-500">{list.total}</span>
+      <section className="relative isolate overflow-hidden rounded-3xl border border-line bg-surface px-5 py-10 shadow-card sm:px-10 sm:py-14">
+        <div className="grid-glow absolute inset-0 -z-10" />
+
+        <h1 className="text-3xl font-semibold leading-[1.15] tracking-tight sm:text-[2.6rem]">
+          把想法写成帖子{' '}
+          <br className="hidden sm:block" />
+          让讨论留在这里
         </h1>
-        <Link href="/new" className="button button-primary">
-          发帖
-        </Link>
-      </div>
 
-      <form action="/" method="get" className="mt-4 flex gap-2">
-        <input name="q" defaultValue={q} placeholder="搜索标题、正文或作者" className="field" />
-        {tag && <input type="hidden" name="tag" value={tag} />}
-        <button type="submit" className="button shrink-0">
-          搜索
-        </button>
-      </form>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-        <Link
-          href={href({ tag: '', page: 1 })}
-          className={tag ? 'rounded-full border border-neutral-200 px-2 py-0.5 text-neutral-500 dark:border-neutral-800' : 'rounded-full bg-neutral-900 px-2 py-0.5 text-white dark:bg-neutral-100 dark:text-neutral-900'}
+        <form
+          action="/"
+          method="get"
+          className="mt-7 flex max-w-xl items-center gap-2 rounded-2xl border border-line bg-surface p-1.5 shadow-card transition-colors focus-within:border-accent/60"
         >
-          全部
-        </Link>
-        {tags.map((item) => (
-          <Link
-            key={item}
-            href={href({ tag: item, page: 1 })}
-            className={
-              item === tag
-                ? 'rounded-full bg-neutral-900 px-2 py-0.5 text-white dark:bg-neutral-100 dark:text-neutral-900'
-                : 'rounded-full border border-neutral-200 px-2 py-0.5 text-neutral-500 dark:border-neutral-800'
-            }
-          >
-            {item}
-          </Link>
-        ))}
-      </div>
+          <Search className="ml-2 h-4 w-4 shrink-0 text-muted" />
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="搜索标题、正文或作者"
+            className="min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted"
+          />
+          {tag && <input type="hidden" name="tag" value={tag} />}
+          <button type="submit" className="button button-primary h-8 px-3.5 text-xs">
+            搜索
+          </button>
+        </form>
 
-      <div className="mt-3 flex gap-4 text-xs text-neutral-500">
-        <Link href={href({ sort: 'active', page: 1 })} className={sort === 'active' ? 'font-semibold text-neutral-900 dark:text-neutral-100' : ''}>
-          最近活跃
-        </Link>
-        <Link href={href({ sort: 'new', page: 1 })} className={sort === 'new' ? 'font-semibold text-neutral-900 dark:text-neutral-100' : ''}>
-          最新发布
-        </Link>
-      </div>
-
-      <ul className="mt-4 border-t border-neutral-200 dark:border-neutral-800">
-        {list.items.map((meta) => (
-          <li key={meta.slug} className="border-b border-neutral-200 py-4 dark:border-neutral-800">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  {meta.pinned && (
-                    <span className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-                      置顶
-                    </span>
-                  )}
-                  <Link href={`/p/${meta.slug}`} className="font-medium hover:underline">
-                    {meta.title}
-                  </Link>
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                  <Link href={`/u/${meta.authorId}`} className="hover:underline">
-                    {meta.author}
-                  </Link>
-                  <span>·</span>
-                  <time dateTime={meta.createdAt}>{formatDate(meta.createdAt)}</time>
-                  {meta.tags.map((item) => (
-                    <Link key={item} href={href({ tag: item, page: 1 })} className="hover:underline">
-                      #{item}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <span className="shrink-0 text-xs text-neutral-500">{meta.replyCount} 回复</span>
+        <dl className="mt-8 flex flex-wrap items-end gap-x-10 gap-y-4">
+          {[
+            { label: filtering ? '匹配帖子' : '帖子', value: list.total },
+            { label: '回复', value: list.replyTotal },
+            { label: '标签', value: tags.length },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <dt className="text-[11px] text-muted">{stat.label}</dt>
+              <dd className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight">{stat.value}</dd>
             </div>
+          ))}
+        </dl>
+      </section>
+
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Link href={href({ tag: '', page: 1 })} className={clsx('chip', !tag && 'chip-active')}>
+            <Layers className="h-3 w-3" />
+            全部
+          </Link>
+          {tags.map((item) => (
+            <Link key={item} href={href({ tag: item, page: 1 })} className={clsx('chip', item === tag && 'chip-active')}>
+              #{item}
+            </Link>
+          ))}
+        </div>
+
+        <div className="flex items-center rounded-full border border-line bg-surface p-0.5 text-xs">
+          {[
+            { value: 'active', label: '最近活跃' },
+            { value: 'new', label: '最新发布' },
+          ].map((option) => (
+            <Link
+              key={option.value}
+              href={href({ sort: option.value, page: 1 })}
+              className={clsx(
+                'rounded-full px-3 py-1.5 transition-colors',
+                sort === option.value ? 'bg-ink font-medium text-canvas' : 'text-muted hover:text-ink',
+              )}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <ul className="mt-4 space-y-3">
+        {list.items.map((post, index) => (
+          <li key={post.slug} className="animate-rise" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
+            <PostCard post={post} />
           </li>
         ))}
       </ul>
 
-      {list.items.length === 0 && <p className="py-12 text-center text-sm text-neutral-500">没有找到帖子</p>}
+      {list.items.length === 0 && (
+        <div className="card mt-4 flex flex-col items-center gap-2 px-6 py-16 text-center">
+          <span className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-soft text-muted">
+            <FileSearch className="h-6 w-6" />
+          </span>
+          <p className="text-sm font-medium">{filtering ? '没有找到相关帖子' : '还没有帖子'}</p>
+          <p className="text-xs text-muted">{filtering ? '换个关键词或标签再试试' : '发第一篇帖子，把话题开起来'}</p>
+          <Link href={filtering ? '/' : '/new'} className="button button-primary mt-3">
+            {filtering ? '查看全部帖子' : '去发帖'}
+          </Link>
+        </div>
+      )}
 
       {list.pages > 1 && (
-        <nav className="mt-6 flex items-center justify-between text-sm">
-          {list.page > 1 ? (
-            <Link href={href({ page: list.page - 1 })} className="hover:underline">
-              上一页
-            </Link>
-          ) : (
-            <span />
-          )}
-          <span className="text-neutral-500">
+        <nav className="mt-8 flex items-center justify-center gap-2 text-xs">
+          <Link
+            href={href({ page: list.page - 1 })}
+            aria-disabled={list.page <= 1}
+            className={clsx('button h-9 px-3', list.page <= 1 && 'pointer-events-none opacity-40')}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            上一页
+          </Link>
+          <span className="px-2 tabular-nums text-muted">
             {list.page} / {list.pages}
           </span>
-          {list.page < list.pages ? (
-            <Link href={href({ page: list.page + 1 })} className="hover:underline">
-              下一页
-            </Link>
-          ) : (
-            <span />
-          )}
+          <Link
+            href={href({ page: list.page + 1 })}
+            aria-disabled={list.page >= list.pages}
+            className={clsx('button h-9 px-3', list.page >= list.pages && 'pointer-events-none opacity-40')}
+          >
+            下一页
+            <ChevronRight className="h-4 w-4" />
+          </Link>
         </nav>
       )}
     </div>
