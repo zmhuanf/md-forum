@@ -43,8 +43,6 @@ export async function startSession(user: User) {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    // 按对外地址判断，https 站点才加 Secure，避免本地 http 调试时 cookie 失效
-    secure: (process.env.SITE_URL ?? '').startsWith('https://'),
     maxAge: MAX_AGE,
   })
 }
