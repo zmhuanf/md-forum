@@ -1,37 +1,34 @@
+import { Feed } from 'feed'
 import { listPosts } from '@/lib/posts'
 
 export const dynamic = 'force-dynamic'
-
-const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (char) => `&#${char.charCodeAt(0)};`)
 
 export async function GET() {
   const site = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, '')
   const { items } = await listPosts({ sort: 'new', pageSize: 50 })
 
-  const entries = items
-    .map(
-      (meta) => `    <item>
-      <title>${escapeXml(meta.title)}</title>
-      <link>${site}/p/${meta.slug}</link>
-      <guid isPermaLink="true">${site}/p/${meta.slug}</guid>
-      <pubDate>${new Date(meta.createdAt).toUTCString()}</pubDate>
-      <author>${escapeXml(meta.author)}</author>
-    </item>`,
-    )
-    .join('\n')
+  const feed = new Feed({
+    title: 'md forum',
+    description: '一个简洁的讨论社区',
+    id: site,
+    link: site,
+    language: 'zh-CN',
+    updated: new Date(items[0]?.createdAt ?? Date.now()),
+    feedLinks: { rss2: `${site}/rss.xml` },
+    author: { name: 'md forum', link: site },
+  })
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>md forum</title>
-    <link>${site}</link>
-    <description>一个简洁的讨论社区</description>
-    <language>zh-CN</language>
-${entries}
-  </channel>
-</rss>`
+  for (const meta of items) {
+    feed.addItem({
+      title: meta.title,
+      id: `${site}/p/${meta.slug}`,
+      link: `${site}/p/${meta.slug}`,
+      date: new Date(meta.createdAt),
+      author: [{ name: meta.author }],
+    })
+  }
 
-  return new Response(xml, {
+  return new Response(feed.rss2(), {
     headers: { 'content-type': 'application/rss+xml; charset=utf-8' },
   })
 }

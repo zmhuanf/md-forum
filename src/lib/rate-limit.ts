@@ -1,11 +1,17 @@
-const lastActionAt = new Map<string, number>()
+import { RateLimiterMemory, type RateLimiterRes } from 'rate-limiter-flexible'
+
+const limiters = new Map<number, RateLimiterMemory>()
 
 // 返回剩余等待提示；未处于冷却期则记录本次操作并返回 null
-export function cooldown(key: string, seconds: number): string | null {
-  const now = Date.now()
-  const remaining = (lastActionAt.get(key) ?? 0) + seconds * 1000 - now
-  if (remaining > 0) return `操作太频繁，请 ${Math.ceil(remaining / 1000)} 秒后再试`
+export async function cooldown(key: string, seconds: number): Promise<string | null> {
+  const limiter = limiters.get(seconds) ?? new RateLimiterMemory({ points: 1, duration: seconds })
+  limiters.set(seconds, limiter)
 
-  lastActionAt.set(key, now)
-  return null
+  try {
+    await limiter.consume(key)
+    return null
+  } catch (rejection) {
+    const wait = Math.ceil((rejection as RateLimiterRes).msBeforeNext / 1000)
+    return `操作太频繁，请 ${wait} 秒后再试`
+  }
 }

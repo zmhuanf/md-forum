@@ -3,6 +3,7 @@ node_modules
 out
 posts
 users.json
+.locks
 .env
 .env.local
 .env.*.local

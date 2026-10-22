@@ -9,10 +9,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mdxeditor/editor": "^4.3.3",
     "@node-rs/argon2": "^2.2.2",
     "@shikijs/rehype": "^4.5.0",
+    "feed": "^6.0.0",
     "gray-matter": "^4.0.3",
+    "jose": "^6.2.13",
+    "mdast-util-to-string": "^4.0.0",
     "next": "^16.4.2",
+    "proper-lockfile": "^4.1.2",
+    "rate-limiter-flexible": "^11.2.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "rehype-sanitize": "^6.0.0",
@@ -23,13 +29,18 @@
     "remark-rehype": "^11.1.2",
     "shiki": "^4.5.0",
     "unified": "^11.0.5",
+    "vaul": "^1.1.2",
+    "write-file-atomic": "^7.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^26.6.5",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/write-file-atomic": "^4.0.3",
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"

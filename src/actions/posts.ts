@@ -18,7 +18,7 @@ export async function createPostAction(_prev: FormState, formData: FormData): Pr
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '内容不合法' }
 
-  const wait = cooldown(`post:${user}`, 30)
+  const wait = await cooldown(`post:${user}`, 30)
   if (wait) return { error: wait }
 
   let slug: string
@@ -76,7 +76,7 @@ export async function replyAction(_prev: FormState, formData: FormData): Promise
   const parsed = replyInputSchema.safeParse({ content: String(formData.get('content') ?? '') })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '回复不合法' }
 
-  const wait = cooldown(`reply:${user}`, 10)
+  const wait = await cooldown(`reply:${user}`, 10)
   if (wait) return { error: wait }
 
   try {

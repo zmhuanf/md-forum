@@ -1,20 +1,19 @@
+import { toString } from 'mdast-util-to-string'
+import remarkGfm from 'remark-gfm'
+import remarkParse from 'remark-parse'
+import { unified } from 'unified'
+
 const formatter = new Intl.DateTimeFormat('zh-CN', {
   dateStyle: 'medium',
   timeStyle: 'short',
   timeZone: 'Asia/Shanghai',
 })
 
-// 从 Markdown 中提纯文本摘要，供页面 description 使用
+const parser = unified().use(remarkParse).use(remarkGfm)
+
+// 把 Markdown 解析成语法树后取纯文本，供页面 description 使用
 export const excerpt = (markdown: string, length = 120) =>
-  markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`]*`/g, ' ')
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<!?[^>]*>/g, ' ')
-    .replace(/^\s*\|?[\s:|-]+\|?\s*$/gm, ' ')
-    .replace(/^\s*[-+*]\s+/gm, ' ')
-    .replace(/[#>*_~|]/g, ' ')
+  toString(parser.parse(markdown), { includeImageAlt: false, includeHtml: false })
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, length)

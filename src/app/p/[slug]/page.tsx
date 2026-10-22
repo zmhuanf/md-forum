@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { deletePostAction, replyAction } from '@/actions/posts'
 import { DeletePostForm } from '@/components/DeletePostForm'
-import { ReplyForm } from '@/components/ReplyForm'
+import { ReplyDock } from '@/components/ReplyDock'
 import { excerpt, formatDate } from '@/lib/format'
 import { renderMarkdown } from '@/lib/markdown'
 import { isSlug } from '@/lib/paths'
@@ -69,7 +69,7 @@ export default async function PostPage({ params }: Props) {
           ))}
         </div>
 
-        <div className="prose mt-6" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="prose mt-6 max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: html }} />
       </article>
 
       <section className="mt-10">
@@ -83,23 +83,15 @@ export default async function PostPage({ params }: Props) {
                 <time dateTime={reply.createdAt}>{formatDate(reply.createdAt)}</time>
                 <span>#{index + 1}</span>
               </div>
-              <div className="prose mt-2" dangerouslySetInnerHTML={{ __html: replyHtml[index] ?? '' }} />
+              <div className="prose mt-2 max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: replyHtml[index] ?? '' }} />
             </li>
           ))}
         </ul>
 
         {replies.length === 0 && <p className="mt-4 text-sm text-neutral-500">还没有回复</p>}
-
-        <div className="mt-6">
-          {!user && (
-            <Link href={`/login?next=/p/${slug}`} className="text-sm hover:underline">
-              登录后回复
-            </Link>
-          )}
-          {user && meta.closed && <p className="text-sm text-neutral-500">帖子已关闭，无法回复</p>}
-          {user && !meta.closed && <ReplyForm action={replyAction} slug={slug} />}
-        </div>
       </section>
+
+      {!meta.closed && <ReplyDock action={replyAction} slug={slug} signedIn={Boolean(user)} />}
     </div>
   )
 }

@@ -15,7 +15,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '注册信息不合法' }
 
   const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-  const wait = cooldown(`register:${ip}`, 60)
+  const wait = await cooldown(`register:${ip}`, 60)
   if (wait) return { error: wait }
 
   try {
@@ -35,7 +35,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '登录信息不合法' }
 
-  const wait = cooldown(`login:${parsed.data.username}`, 3)
+  const wait = await cooldown(`login:${parsed.data.username}`, 3)
   if (wait) return { error: wait }
 
   if (!(await verifyUser(parsed.data.username, parsed.data.password))) return { error: '用户名或密码错误' }
