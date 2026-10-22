@@ -13,7 +13,14 @@ export function PostForm({ action, post }: Props) {
   const [state, formAction, pending] = useActionState(action, null)
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form
+      // 手动提交，避免 action 完成后 React 重置表单清空已输入内容
+      onSubmit={(event) => {
+        event.preventDefault()
+        formAction(new FormData(event.currentTarget))
+      }}
+      className="space-y-4"
+    >
       {post && <input type="hidden" name="slug" value={post.slug} />}
 
       <label className="block text-sm">
