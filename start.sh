@@ -5,7 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")" || exit 1
 ROOT=$(pwd -P)
 
-PORT=${PORT:-3000}
+PORT=${PORT:-22007}
 HOST=${HOST:-0.0.0.0}
 PID_DIR=pid
 LOG_DIR=nohup_log
